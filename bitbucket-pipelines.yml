@@ -24,6 +24,7 @@ pipelines:
         name: Build and Push Docker Image
         image: google/cloud-sdk:latest
         script:
+        - apt-get install google-cloud-sdk-gke-gcloud-auth-plugin
         - echo $GCLOUD_API_KEYFILE > ~/.gcloud-api-key.json
         - gcloud auth activate-service-account --key-file ~/.gcloud-api-key.json
         - docker login -u _json_key --password-stdin https://$DOCKER_GCR_REPO_URL < ~/.gcloud-api-key.json
@@ -35,6 +36,10 @@ pipelines:
         - docker push $DOCKER_GCR_REPO_URL/$GCLOUD_PROJECT_ID/$DOCKER_IMAGE_NAME:${BITBUCKET_COMMIT}
 
 #        - gcloud container clusters get-credentials $K8s_CLUSTER_NAME --zone=$GCLOUD_ZONE --project $GCLOUD_PROJECT_ID
+        - gcloud container clusters get-credentials autopilot-cluster-1 --region us-central1 --project forward-camera-317410
+# DEPLOYMENT
+        - kubectl create namespace $BITBUCKET_BRANCH  --dry-run=client -o yaml | kubectl apply -f -
+        - kubectl set image deployment $K8s_DEPLOYMENT_NAME $K8s_DEPLOYMENT_NAME=$DOCKER_GCR_REPO_URL/$GCLOUD_PROJECT_ID/$DOCKER_IMAGE_NAME:${BITBUCKET_COMMIT} --record --namespace=$BITBUCKET_BRANCH  
 
            # DEPLOYMENT
 #        - kubectl set image deployment $K8s_DEPLOYMENT_NAME $K8s_DEPLOYMENT_NAME=$DOCKER_GCR_REPO_URL/$GCLOUD_PROJECT_ID/$DOCKER_IMAGE_NAME:${BITBUCKET_COMMIT} --record --namespace=$K8s_NAMESPACE
