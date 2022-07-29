@@ -28,3 +28,4 @@ pipelines:
 # DEPLOYMENT
         - Kubectl create namespace $BITBUCKET_BRANCH
         - kubectl set image deployment $K8s_DEPLOYMENT_NAME $K8s_DEPLOYMENT_NAME=$DOCKER_GCR_REPO_URL/$GCLOUD_PROJECT_ID/$DOCKER_IMAGE_NAME:${BITBUCKET_COMMIT} --record --namespace=$BITBUCKET_BRANCH  
+        
